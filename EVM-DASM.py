@@ -173,7 +173,6 @@ push_map={
 
 
 def get_opcode(string):
-    skip=False
     skip_times=0
     for i in range(0,len(string),2):
         code=string[i:i+2]
@@ -188,11 +187,8 @@ def get_opcode(string):
             print("PUSH"+str(n)+" "+string[i+2:i+2+2*n])
             skip_times=n
             
-
-
-        
-        
+       
 
 if __name__ == "__main__":
-    hex_string=input("ByteCode(hex):")
+    hex_string=input("Bytecode(hex):")
     get_opcode(hex_string)
