@@ -179,14 +179,22 @@ def get_opcode(string):
     for i in range(0, len(string), 2):
         code = string[i:i+2]
         if skip_times != 0:
+            print(code,end='')
             skip_times -= 1
+            if skip_times ==0:
+                print('')
             continue
 
-        if not (code[0] == '6' or code[0] == '7'):
-            print(code+": "+opcodes[code])
+        if code[0] != '6' and code[0] != '7':
+            if code in opcodes.keys():
+                print(code+": "+opcodes[code])
+            else:
+                print(code+': <------------ ERROR')
+            
         else:
             n = push_map[code]
-            print(code+": PUSH"+str(n)+" "+string[i+2:i+2+2*n])
+            # print(code+": PUSH"+str(n)+" "+string[i+2:i+2+2*n])
+            print(code+": PUSH"+str(n)+" ",end='')
             skip_times = n
 
 
