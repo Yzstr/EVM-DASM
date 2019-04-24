@@ -174,28 +174,129 @@ push_map = {
 }
 
 
+def print_gap(choice):
+    '''
+    +--------+-------------------+
+    | Choice | Output            |
+    +--------+-------------------+
+    | 0      | Deployment Opcode |
+    +--------+-------------------+
+    | 1      | Contract Opcode   |
+    +--------+-------------------+
+    | 2      | ?                 |
+    +--------+-------------------+
+    | 3      | bzzr code         |
+    +--------+-------------------+
+    | 4      | ABI Augs          |
+    +--------+-------------------+
+    '''
+    if choice == 0:
+        print('\n\n')
+        print('***********************************', end='')
+        print('***********************************')
+        print('Deployment Opcode')
+        print('***********************************', end='')
+        print('***********************************')
+    if choice == 1:
+        print('\n\n')
+        print('***********************************', end='')
+        print('***********************************')
+        print('Contract Opcode Below')
+        print('***********************************', end='')
+        print('***********************************')
+    if choice == 2:
+        print('\n\n')
+        print('***********************************', end='')
+        print('***********************************')
+        print('What\'s this? ("00" is trivial)')
+        print('***********************************', end='')
+        print('***********************************')
+    if choice == 3:
+        print('\n\n')
+        print('***********************************', end='')
+        print('***********************************')
+        print('bzzr code')
+        print('***********************************', end='')
+        print('***********************************')
+    if choice == 4:
+        print('\n\n')
+        print('***********************************', end='')
+        print('***********************************')
+        print('ABI Augs')
+        print('***********************************', end='')
+        print('***********************************')
+
+
 def get_opcode(string):
     skip_times = 0
-    for i in range(0, len(string), 2):
-        code = string[i:i+2]
-        if skip_times != 0:
-            print(code,end='')
-            skip_times -= 1
-            if skip_times ==0:
-                print('')
-            continue
+    first_stop = 0
+    log_out = False
+    last_stop = 0
 
-        if code[0] != '6' and code[0] != '7':
-            if code in opcodes.keys():
-                print(code+": "+opcodes[code])
+    print_gap(0)
+    for it in range(2):
+        for i in range(0, len(string), 2):
+            code = string[i:i+2]
+            if skip_times != 0:
+                if log_out:
+                    print(code, end='')
+                skip_times -= 1
+                if skip_times == 0:
+                    if log_out:
+                        print('')
+                continue
+
+            if code == '00':
+                if first_stop == 0:
+                    first_stop = i
+                if not log_out:
+                    last_stop = i
+                else:
+                    print(code+": "+opcodes[code])
+                    if i == first_stop:
+                        print_gap(1)
+                    if i == last_stop:
+                        break
+                    continue
+
+            if code[0] != '6' and code[0] != '7':
+                if code in opcodes.keys():
+                    if log_out:
+                        print(code+": "+opcodes[code])
+                else:
+                    if log_out:
+                        print(code+': <------------ ERROR')
+                        print('The Contract Opcode ends at {}.\\'.format(last_stop))
+                    break
+
             else:
-                print(code+': <------------ ERROR')
-            
-        else:
-            n = push_map[code]
-            # print(code+": PUSH"+str(n)+" "+string[i+2:i+2+2*n])
-            print(code+": PUSH"+str(n)+" ",end='')
-            skip_times = n
+                n = push_map[code]
+
+                if log_out:
+                    print(code+": PUSH"+str(n)+" ", end='')
+                skip_times = n
+
+        log_out = True
+        print(last_stop)
+
+    data = string[last_stop:]
+    bzzr_begin = data.find('a165627a7a72305820')
+    if log_out:
+        print_gap(2)
+        print(data[:bzzr_begin], end='\n\n')
+
+    if bzzr_begin > -1:
+        if log_out:
+            print_gap(3)
+            print("bzzr: "+data[bzzr_begin+18:bzzr_begin+18+64])
+        abi_begin = bzzr_begin+18+64+4
+        print_gap(4)
+        for i in range(abi_begin, len(data), 64):
+            if log_out:
+                print('Arg [{}]: '.format(str(i // 64))+data[i:i+64])
+    else:
+        if log_out:
+            print('bzzr not found')
 
 
 if __name__ == "__main__":
