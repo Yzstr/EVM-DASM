@@ -114,7 +114,7 @@ Arg [8]: 424e420000000000000000000000000000000000000000000000000000000000
 ```
 
 ## TODO
-- Add expections
+- Add exceptions
 - Retrieve stack status
 
 ## License
