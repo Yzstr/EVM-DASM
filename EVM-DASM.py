@@ -201,7 +201,7 @@ def print_gap(choice):
         print('\n\n')
         print('***********************************', end='')
         print('***********************************')
-        print('Contract Opcode Below')
+        print('Contract Opcode')
         print('***********************************', end='')
         print('***********************************')
     if choice == 2:
@@ -277,7 +277,7 @@ def get_opcode(string):
                 skip_times = n
 
         log_out = True
-        print(last_stop)
+        # print(last_stop)
 
     data = string[last_stop:]
     bzzr_begin = data.find('a165627a7a72305820')
