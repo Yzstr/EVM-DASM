@@ -1,4 +1,4 @@
-opcodes = {
+opCodes = {
     '00': 'STOP',
     '01': 'ADD',
     '02': 'MUL',

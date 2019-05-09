@@ -1,5 +1,6 @@
 import json
 import sha3
+from pprint import pprint
 
 function_name=[]
 
@@ -22,10 +23,10 @@ for dict in data:
         
         function_name.append(name)
 
-print(function_name)
+pprint(function_name)
 
 function_name_hash=dict.fromkeys(function_name)
 for name in function_name_hash.keys():
     function_name_hash[name]=sha3.keccak_256(name.encode('utf-8')).hexdigest().upper()[:8]
 
-print(function_name_hash)
+pprint(function_name_hash)
