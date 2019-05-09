@@ -4,3 +4,6 @@
 *.abihash
 *.ipynb
 *.opc
+
+__pycache__/
+.ipynb_checkpoints/
