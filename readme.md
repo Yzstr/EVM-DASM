@@ -373,6 +373,7 @@ The last is the Constructor Arguments.
 
 ## TODO
 - Event analysis
+- Add options
 
 ## License
 MIT
