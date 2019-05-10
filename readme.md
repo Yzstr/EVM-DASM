@@ -1,8 +1,8 @@
 # EVM-DASM
-Convert EVM bytecode to opcode refer to the [Ethereum Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf).
+Convert EVM byteCode to opCode via the [Ethereum Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf).
 
 # Usage
-The input opcode must include the deployment opcode rather than just contract opcode. A valid input may has the pattern as follows.
+The input opcode shall include the deployment opcode rather than just contract opcode. A valid input may has the pattern as follows.
 
 ```
 +-------------------+-------------------------------------------------------------------+
