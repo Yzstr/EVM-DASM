@@ -22,7 +22,7 @@ Note that the input `contract.bin` shall contain the deployment byteCode rather 
 +-------------------+-------------------------------------------------------------------+
 | bzzr code         | The address that indicates swarm source.                          |
 +-------------------+-------------------------------------------------------------------+
-| ABI Args          | Constructor Arguments                                                         |
+| ABI Args          | Constructor Arguments                                             |
 +-------------------+-------------------------------------------------------------------+
 ```
 
