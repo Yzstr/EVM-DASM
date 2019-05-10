@@ -44,7 +44,7 @@ Bytecodes of BNB from [Etherscan](https://etherscan.io/address/0xB8c77482e45F1F4
     python3 EVM-DAMS.py bnb.bin bnb.abi > bnb.txt
 ```
 
-First, we got the abi hash table first, which provides function name and function hash.
+We got the abi hash table first, which provides function name and function hash.
 
 ```
 {'06fdde03': ['name()', ''],
@@ -64,7 +64,7 @@ First, we got the abi hash table first, which provides function name and functio
  'dd62ed3e': ['allowance(address,address)', '']}
 ```
 
-Second, we got the deployment opCode.
+Then we got the deployment opCode.
 
 ```
 0x00000000:  60   PUSH1       60
@@ -91,7 +91,7 @@ Second, we got the deployment opCode.
 0x000001ec:  00   STOP   
 ```
 
-Third, we got the contract opCode. Note that the Function Head appears in the top of contract opCode.
+After that, we got the contract opCode. Note that the Function Head appears in the top of contract opCode.
 
 ```
 0x00000000:  60   PUSH1       60
@@ -350,7 +350,7 @@ The rest of the opCodes needs a further insight. After that is a reconsrtucted a
  'dd62ed3e': ['allowance(address,address)', '0530']}
  ```
 
- Then follows the bzzr swarm source of the contract.
+Then follows the bzzr swarm source of the contract.
 
 ```
 'bzzr: 082734e053ffbdf2a3195354a3210dff3723c239a1e76ae3be0936f6aed31bee'
