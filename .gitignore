@@ -4,8 +4,11 @@
 *.abihash
 *.ipynb
 *.opc
+*.sol
+
 
 __pycache__/
 .ipynb_checkpoints/
+*/*
 
 tempCodeRunnerFile.py

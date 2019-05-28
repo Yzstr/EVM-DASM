@@ -11,31 +11,38 @@ def split_byteCode(byteCode_file, isDeploy=True):
     contract_start = 0
     contract_end = 0       # How to find the end if the end is not the begin of bzzr?
     bzzr_start = 0
-    augs_start = 0
+    args_start = 0
     deployment = ''
     contract = ''
     bzzr = ''
-    augs = []
+    args = []
 
     byteCode = byteCode.lower()
     if isDeploy:
-        contract_start = byteCode.find('f300')
-        contract_start += 4
+        contract_start = byteCode.find('f300') + 4
 
-    bzzr_start = byteCode.find('a165627a7a72305820')
-    bzzr = 'bzzr: '+byteCode[bzzr_start+18:bzzr_start+18+64]
-    augs_start = bzzr_start+18+64+4
+    bzzr_start = byteCode.find('a165627a7a72305820')+18
+    bzzr = 'bzzr: '+byteCode[bzzr_start:bzzr_start+64]
+    args_start = bzzr_start+64+4
 
-    for i in range(augs_start, len(byteCode), 64):
+    for i in range(args_start, len(byteCode), 64):
         aug = str('Arg [{}]: '.format(
-            str((i-augs_start) // 64))+byteCode[i:i+64])
-        augs.append(aug)
+            str((i-args_start) // 64))+byteCode[i:i+64])
+        args.append(aug)
+
     deployment = byteCode[:contract_start]
     contract = byteCode[contract_start:bzzr_start]
-    return deployment, contract, bzzr, augs
+    return deployment, contract, bzzr, args
 
 
 def get_opCode_list(byteCode):
+    """
+    input: byteCode -> string
+    output: opCode List -> list of lists
+
+    Structure of an opCode: [address, bytecode, opcode, arguments if exist]
+    """
+
     opCode_list = []
     push_skip_times = 0
     for i in range(0, len(byteCode), 2):
@@ -43,9 +50,11 @@ def get_opCode_list(byteCode):
         if push_skip_times == 0:
             loc = '0x'+str(hex(i//2))[2:].zfill(8)
             if code[0] != '6' and code[0] != '7':
+                # is not a push-like opCode
                 opCode = [loc, code, opCodes.get(code, '<------- ERROR'), '']
                 opCode_list.append(opCode)
             else:
+                # is a push-like opCode
                 push_skip_times = push_map[code]
                 opCode = [loc, code, opCodes.get(
                     code, '<------- ERROR'), byteCode[i+2:i+2+push_skip_times*2]]
@@ -58,6 +67,7 @@ def get_opCode_list(byteCode):
 
 def print_opCode(opCode_list, abi_hash_dict={}, isContract=False):
     if not isContract:
+        # print the deployment opCode, just print it all
         for opCode in opCode_list:
             print(opCode[0]+':  '+opCode[1]+'   ' +
                   opCode[2]+'       '+opCode[3])
@@ -65,14 +75,17 @@ def print_opCode(opCode_list, abi_hash_dict={}, isContract=False):
     else:
         for i in range(len(opCode_list)):
             if opCode_list[i][1] == '80':
-                if opCode_list[i+1][1] == '63' and opCode_list[i+2][1] == '14' and opCode_list[i+3][1] == '61' and opCode_list[i+4][1] == '57':
+                if opCode_list[i+1][1] == '63' and opCode_list[i+2][1] == '14' and (opCode_list[i+3][1] in push_map.keys()) and opCode_list[i+4][1] == '57':
+                    # found a function head here
                     function_name_hash = opCode_list[i+1][3]
                     function_name = abi_hash_dict[function_name_hash][0]
+                    # put the function address to abi_hash_dict
                     abi_hash_dict[function_name_hash][1] = opCode_list[i+3][3]
                     print('\nFunction Head:   '+function_name)
+            # check if it is a function body
             function_check = get_function_name_by_address(
-                opCode_list[i][0][-4:], abi_hash_dict)
-            if function_check != None:
+                opCode_list[i][0], abi_hash_dict)
+            if function_check:
                 print('\nFunction Body:   '+function_check)
             print(opCode_list[i][0]+':  '+opCode_list[i][1] +
                   '   '+opCode_list[i][2]+'       '+opCode_list[i][3])
@@ -83,7 +96,7 @@ def print_opCode(opCode_list, abi_hash_dict={}, isContract=False):
 
 def get_function_name_by_address(address, abi_hash_dict):
     for abi_info in abi_hash_dict.values():
-        if address == abi_info[1]:
+        if address[-1*len(abi_info[1]):] == abi_info[1] and address[2:-1*len(abi_info[1])] == (8-len(abi_info[1]))*'0':
             return abi_info[0]
     return None
 
@@ -94,6 +107,7 @@ def get_abi_hash_dict(abi_file):
 
     function_name_list = []
 
+    # construct function name as 'foo(type1, type2, ... , typen)'
     for abi_data in abi_data_all:
         if abi_data['type'] == 'function':
             name = abi_data['name']
@@ -109,6 +123,7 @@ def get_abi_hash_dict(abi_file):
             function_name_list.append(name)
     abi_hash_dict = {}
     for name in function_name_list:
+    # get hashed function name using keccak_256
         hashed_string = sha3.keccak_256(
             name.encode('utf-8')).hexdigest().lower()[:8]
         abi_hash_dict[hashed_string] = [name, '']
@@ -124,7 +139,7 @@ if __name__ == "__main__":
     pprint(abi_hash_dict)
     print('\n\n')
 
-    deployment, contract, bzzr, augs = split_byteCode(binary_file)
+    deployment, contract, bzzr, args = split_byteCode(binary_file)
 
     deploy_list = get_opCode_list(deployment)
     contract_list = get_opCode_list(contract)
@@ -132,9 +147,8 @@ if __name__ == "__main__":
     print_opCode(deploy_list)
     print_opCode(contract_list, abi_hash_dict, True)
 
-    
     pprint(abi_hash_dict)
     print('\n\n')
     pprint(bzzr)
     print('\n\n')
-    pprint(augs)
+    pprint(args)
