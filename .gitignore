@@ -5,6 +5,7 @@
 *.ipynb
 *.opc
 *.sol
+*.bak
 
 
 __pycache__/

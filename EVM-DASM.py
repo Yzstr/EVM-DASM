@@ -65,33 +65,54 @@ def get_opCode_list(byteCode):
     return opCode_list
 
 
+def print_contract(opCode_list, abi_hash_dict={}):
+    for i in range(len(opCode_list)):
+        if opCode_list[i][1] == '80':
+            if opCode_list[i+1][1] == '63' and opCode_list[i+2][1] == '14' and (opCode_list[i+3][1] in push_map.keys()) and opCode_list[i+4][1] == '57':
+                # found a function head here
+                function_name_hash = opCode_list[i+1][3]
+                function_name = abi_hash_dict[function_name_hash][0]
+                # put the function address to abi_hash_dict
+                abi_hash_dict[function_name_hash][1] = opCode_list[i+3][3]
+                print('\nFunction Head:   '+function_name)
+        # check if it is a fallback function
+        if opCode_list[i][1]=='5b' and i>=5:
+            if opCode_list[i-1][1]=='57' and (opCode_list[i-2][1] in push_map.keys()) and opCode_list[i-3][1]=='14' and opCode_list[i-4][1] == '63':
+                print('\nFallback Function:   ')
+        # check if it is a function body
+        function_check = get_function_name_by_address(
+            opCode_list[i][0], abi_hash_dict)
+        if function_check:
+            print('\nFunction Body:   '+function_check)
+        print(opCode_list[i][0]+':  '+opCode_list[i][1] +
+              '   '+opCode_list[i][2]+'       '+opCode_list[i][3])
+        if opCode_list[i][1] == '00' or opCode_list[i][1] == 'f3':
+            print('\n')
+    print('\n\n\n')
+
+
+def print_deploy(opCode_list):
+    for i in range(len(opCode_list)):
+
+        if opCode_list[i][1] == '50':
+            if opCode_list[i-1][1] == '5b' and opCode_list[i-2][1] == 'fd' and opCode_list[i-3][1] == '80':
+                print('\nConstructor:   ')
+
+        if i != range(len(opCode_list))[-1]:
+            if opCode_list[i+1][1] == '80':
+                if(opCode_list[i+2][1] in push_map.keys()) and (opCode_list[i+3][1] in push_map.keys()) and (opCode_list[i+4][1] == '39'):
+                    print('\n')
+                    direct_print = True
+        print(opCode_list[i][0]+':  '+opCode_list[i][1] +
+              '   ' + opCode_list[i][2]+'       '+opCode_list[i][3])
+    print('\n\n\n')
+
+
 def print_opCode(opCode_list, abi_hash_dict={}, isContract=False):
-    if not isContract:
-        # print the deployment opCode, just print it all
-        for opCode in opCode_list:
-            print(opCode[0]+':  '+opCode[1]+'   ' +
-                  opCode[2]+'       '+opCode[3])
-        print('\n\n\n')
+    if isContract:
+        print_contract(opCode_list, abi_hash_dict)
     else:
-        for i in range(len(opCode_list)):
-            if opCode_list[i][1] == '80':
-                if opCode_list[i+1][1] == '63' and opCode_list[i+2][1] == '14' and (opCode_list[i+3][1] in push_map.keys()) and opCode_list[i+4][1] == '57':
-                    # found a function head here
-                    function_name_hash = opCode_list[i+1][3]
-                    function_name = abi_hash_dict[function_name_hash][0]
-                    # put the function address to abi_hash_dict
-                    abi_hash_dict[function_name_hash][1] = opCode_list[i+3][3]
-                    print('\nFunction Head:   '+function_name)
-            # check if it is a function body
-            function_check = get_function_name_by_address(
-                opCode_list[i][0], abi_hash_dict)
-            if function_check:
-                print('\nFunction Body:   '+function_check)
-            print(opCode_list[i][0]+':  '+opCode_list[i][1] +
-                  '   '+opCode_list[i][2]+'       '+opCode_list[i][3])
-            if opCode_list[i][1] == '00' or opCode_list[i][1] == 'f3':
-                print('\n')
-        print('\n\n\n')
+        print_deploy(opCode_list)
 
 
 def get_function_name_by_address(address, abi_hash_dict):
@@ -123,7 +144,7 @@ def get_abi_hash_dict(abi_file):
             function_name_list.append(name)
     abi_hash_dict = {}
     for name in function_name_list:
-    # get hashed function name using keccak_256
+        # get hashed function name using keccak_256
         hashed_string = sha3.keccak_256(
             name.encode('utf-8')).hexdigest().lower()[:8]
         abi_hash_dict[hashed_string] = [name, '']
