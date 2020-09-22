@@ -1,6 +1,8 @@
 # EVM-DASM
 Convert EVM byteCode to opCode via the [Ethereum Yellow Paper](https://ethereum.github.io/yellowpaper/paper.pdf).
 
+*This repo is no more maintanced, please refer to [crtk](https://github.com/hao-n/crtk).*
+
 # Usage
 
 ``` bash
